@@ -11,13 +11,13 @@ import (
 	"reflect"
 	"testing"
 
+	mockdb "github.com/azizk17/go-app/db/mock"
+	db "github.com/azizk17/go-app/db/sqlc"
+	"github.com/azizk17/go-app/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
-	mockdb "github.com/techschool/myApp/db/mock"
-	db "github.com/techschool/myApp/db/sqlc"
-	"github.com/techschool/myApp/util"
 )
 
 type eqCreateUserParamsMatcher struct {

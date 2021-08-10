@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/azizk17/go-app/pkg/token"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
-	"github.com/techschool/myApp/token"
 )
 
 func addAuthorization(

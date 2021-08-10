@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
+	db "github.com/azizk17/go-app/db/sqlc"
+	"github.com/azizk17/go-app/pkg/token"
 	"github.com/gin-gonic/gin"
-	db "github.com/techschool/myApp/db/sqlc"
-	"github.com/techschool/myApp/token"
 )
 
 type transferRequest struct {

@@ -2,15 +2,14 @@ package config
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
+	"github.com/fatih/color"
+
+	db "github.com/azizk17/go-app/db/sqlc"
+	"github.com/azizk17/go-app/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 	"github.com/pkg/errors"
-	db "github.com/techschool/myApp/db/sqlc"
 )
 
 type Server struct {
@@ -46,7 +45,7 @@ func (s *Server) Setup() {
 		// BodyLimit:             s.UploadSize,
 		ReduceMemoryUsage:     true,
 		ErrorHandler:          CustomErrorHandler,
-		DisableStartupMessage: true,
+		DisableStartupMessage: false,
 		// ProxyHeader:           s.ProxyHeader,
 	})
 }
@@ -57,47 +56,77 @@ func (s *Server) Serve(addr ...string) error {
 	if len(addr) != 0 {
 		a = addr[0]
 	}
+
+	// Load routes and ...
+	load(s)
+	error404(s)
+	// s.App.Use(recover.New())
 	s.startupMessage(a)
-	return s.Listen(a)
+	return s.App.Listen(a)
+
 }
 
 //
-func (s *Server) ServeWithGraceFullShutdown(addr ...string) error {
-	a := s.Host + ":" + s.Port
-	if len(addr) != 0 {
-		a = addr[0]
-	}
-	s.startupMessage(a)
+// func (s *Server) ServeWithGraceFullShutdown(addr ...string) error {
+// 	a := s.Host + ":" + s.Port
+// 	if len(addr) != 0 {
+// 		a = addr[0]
+// 	}
+// 	s.startupMessage(a)
 
-	// Listen from a different goroutine
-	go func() {
-		if err := s.Listen(a); err != nil {
-			log.Print(err)
-			os.Exit(0)
-		}
-	}()
+// 	// Listen from a different goroutine
+// 	go func() {
+// 		if err := s.Listen(a); err != nil {
+// 			log.Print(err)
+// 			os.Exit(0)
+// 		}
+// 	}()
 
-	c := make(chan os.Signal, 1) // Create channel to signify a signal being sent
-	signal.Notify(c,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGABRT,
-		syscall.SIGQUIT,
-	) // When an interrupt is sent, notify the channel
-	<-c // This blocks the main thread until an interrupt is received
-	fmt.Println("Shutting down!")
-	return s.Shutdown()
-}
+// 	c := make(chan os.Signal, 1) // Create channel to signify a signal being sent
+// 	signal.Notify(c,
+// 		syscall.SIGINT,
+// 		syscall.SIGTERM,
+// 		syscall.SIGABRT,
+// 		syscall.SIGQUIT,
+// 	) // When an interrupt is sent, notify the channel
+// 	<-c // This blocks the main thread until an interrupt is received
+// 	fmt.Println("Shutting down!")
+// 	return s.Shutdown()
+// }
 
 func (s *Server) startupMessage(a string) {
-	fmt.Printf("\nStarting server on: %v\n", a)
+	color.New(color.FgGreen, color.Bold).Printf("\nStarting server on: %v\n", a)
 }
 
 //
 func (s *Server) Stop() {
-	_ = s.Shutdown()
+	_ = s.App.Shutdown()
 }
 
+func load(s *Server) {
+	// routes
+	routes.LoadRoutes(s.App.Group(""))
+	// middlewares
+}
+func ErrorHandler(ctx *fiber.Ctx, err error) error {
+	// Status code defaults to 500
+	code := fiber.StatusInternalServerError
+
+	// Retrieve the custom status code if it's an fiber.*Error
+	if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+	}
+
+	// Send custom error page
+	err = ctx.Status(code).SendFile(fmt.Sprintf("./%d.html", code))
+	if err != nil {
+		// In case the SendFile fails
+		return ctx.Status(500).SendString("Internal Server Error")
+	}
+
+	// Return from handler
+	return nil
+}
 func CustomErrorHandler(c *fiber.Ctx, err error) error {
 	// StatusCode defaults to 500
 	code := fiber.StatusInternalServerError
@@ -113,5 +142,11 @@ func CustomErrorHandler(c *fiber.Ctx, err error) error {
 	}
 	return c.Status(code).Render(fmt.Sprintf("errors/%d", code), fiber.Map{ //nolint:nolintlint,errcheck
 		"error": err,
+	})
+}
+
+func error404(s *Server) {
+	s.App.Use(func(c *fiber.Ctx) error {
+		return c.Status(404).SendString("Page not Found")
 	})
 }

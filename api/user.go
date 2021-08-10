@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	db "github.com/azizk17/go-app/db/sqlc"
+	"github.com/azizk17/go-app/util"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
-	db "github.com/techschool/myApp/db/sqlc"
-	"github.com/techschool/myApp/util"
 )
 
 type createUserRequest struct {

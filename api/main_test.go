@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	db "github.com/azizk17/go-app/db/sqlc"
+	"github.com/azizk17/go-app/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
-	db "github.com/techschool/myApp/db/sqlc"
-	"github.com/techschool/myApp/util"
 )
 
 func newTestServer(t *testing.T, store db.Store) *Server {

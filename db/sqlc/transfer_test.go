@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/azizk17/go-app/util"
 	"github.com/stretchr/testify/require"
-	"github.com/techschool/myApp/util"
 )
 
 func createRandomTransfer(t *testing.T, account1, account2 Account) Transfer {

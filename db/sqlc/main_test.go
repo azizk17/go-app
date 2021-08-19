@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/azizk17/go-app/util"
 	_ "github.com/lib/pq"
-	"github.com/techschool/myApp/util"
 )
 
 var testQueries *Queries
